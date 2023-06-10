@@ -56,9 +56,31 @@ class Scanner{
                 case '\n':
                     line++;
                 break;
+                case '"': string(); break;
+
                 default: std::cout <<"error" <<std::endl;//error(line,"Unexpected character."); break;
             }
         }
+
+        void string() {
+                while (peek() != '"' && !isAtEnd()) {
+                    if (peek() == '\n') line++;
+                    advance();
+                }
+
+                if (isAtEnd()) {
+                    std::cout <<"error unterminated string."<<std::endl;
+                   // error(line, "Unterminated string.");
+                    return;
+                }
+
+                // The closing ".
+                advance();
+
+                // Trim the surrounding quotes.
+                std::string value = source.substr(start + 1, current - start - 2);
+                addToken(STRING, value);
+            }
         bool match(char expected) {
             if (isAtEnd()) return false;
             if (source[current] != expected) return false;
