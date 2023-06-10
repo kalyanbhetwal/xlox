@@ -3,13 +3,19 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "Scanner.cpp"
 
 void run(const std::string& sourceCode){
 
+    Scanner scanner(sourceCode);
+    std::vector<Token> tokens = scanner.scanTokens();
+
+  // For now, just print the tokens.
+  for (auto token : tokens) {
+    std::cout << token.lexeme << std::endl;
+  }
     // Indicate an error in the exit code.
     if(hadError)return;
-
-
 }
 
 void report(int line, const std::string& where, const std::string& message){

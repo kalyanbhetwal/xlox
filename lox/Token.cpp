@@ -17,8 +17,4 @@ class Token{
         std::string toString(){
             return std::to_string(static_cast<int>(type)) + " " + lexeme + " "+ literal;
         }
-
-
-
-
 };
