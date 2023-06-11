@@ -1,5 +1,5 @@
 # xlox
-Implementing the Lox Language in C++
+Implementing the Lox Language in C++.
 
            ,--.     ,-----.  ,--.   ,--. 
 ,--.  ,--. |  |    '  .-.  '  \  `.'  /  
