@@ -1,19 +1,12 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include "Token.cpp"
+#include <map>
+#include "Scanner.hpp"
 
-class Scanner{
-    private:
-        std::string source;
-        std::vector<Token> tokens;
-        int start;
-        int current ;
-        int line ;
-    public:
-        Scanner(const std::string& source): source(source), start(0), current(0), line(1){}
-
-        std::vector<Token> scanTokens(){
+const std::map<std::string, TokenType> Scanner::keywords;
+Scanner::Scanner(const std::string& source): source(source), start(0), current(0), line(1){};
+        std::vector<Token> Scanner::scanTokens(){
             while(!isAtEnd()){
                 start = current;
                 scanToken();
@@ -21,10 +14,10 @@ class Scanner{
               tokens.push_back(Token(END_OF_FILE,"","",line));
               return tokens;
         }
-        bool isAtEnd(){
+bool Scanner::isAtEnd(){
             return current >= source.length();
         }
-        void scanToken() {
+void Scanner::scanToken() {
             char c = advance();
             switch (c) {
                 case '(': addToken(LEFT_PAREN); break;
@@ -56,13 +49,50 @@ class Scanner{
                 case '\n':
                     line++;
                 break;
+                //handle strings
                 case '"': string(); break;
+                case 'o':
+                  if (match('r')){
+                    addToken(OR);
+                  }
+                  break;
 
-                default: std::cout <<"error" <<std::endl;//error(line,"Unexpected character."); break;
+                default: 
+                // handle numbers
+                if (isDigit(c)){
+                    number();
+                }else if(isAlpha(c)){
+                    identifier();
+                }
+                else{
+                    std::cout <<"error" <<std::endl;//error(line,"Unexpected character."); break;
+                }
             }
         }
+void Scanner::identifier(){
+            while(isAlphanumeric(peek())) advance();
+            std::string text = source.substr(start, current);
+            TokenType type = IDENTIFIER;
+            auto it = Scanner::keywords.find(text);
+            if (it != Scanner::keywords.end()) {
+                type = it->second;
+            }
+            addToken(type);
+        }
 
-        void string() {
+bool Scanner::isDigit(const char& c){
+            return c >='0' && c<='9';
+        }
+void Scanner::number(){
+            while( isDigit(peek())) advance();
+            if (peek() =='.' && isDigit(peekNext())){
+                advance();
+                while (isDigit(peek())) advance();
+            }
+            addToken(NUMBER, source.substr(start, current - start));
+
+        }
+void Scanner::string() {
                 while (peek() != '"' && !isAtEnd()) {
                     if (peek() == '\n') line++;
                     advance();
@@ -81,27 +111,39 @@ class Scanner{
                 std::string value = source.substr(start + 1, current - start - 2);
                 addToken(STRING, value);
             }
-        bool match(char expected) {
+bool Scanner::match(char expected) {
             if (isAtEnd()) return false;
             if (source[current] != expected) return false;
-
             current++;
             return true;
         }
-        char peek() {
+char Scanner::peek() {
             if (isAtEnd()) return '\0';
             return source[current];
         }
-        char advance() {
+
+char Scanner::peekNext(){
+            if(current + 1 >= source.length()) return '\0';
+            return source[current+1];
+        }
+bool Scanner::isAlpha(char c){
+            return (c >= 'a' && c <= 'z') ||
+            (c>='A' && c<='Z') || c=='_';
+        }
+
+bool Scanner::isAlphanumeric(char c){
+            return isAlpha(c) || isDigit(c);
+        }
+
+char Scanner::advance() {
                 return source[current++];
         }
 
-        void addToken(TokenType type) {
+void Scanner::addToken(TokenType type) {
                 addToken(type, "");
         }
 
-        void addToken(TokenType type, const std::string& literal) {
+void Scanner::addToken(TokenType type, const std::string& literal) {
                 std::string text = source.substr(start, current - start);
                 tokens.push_back(Token(type, text, literal, line));
         }
-};

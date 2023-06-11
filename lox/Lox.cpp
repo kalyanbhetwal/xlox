@@ -1,9 +1,10 @@
 #include "Lox.hpp"
+#include "Scanner.hpp"
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <sstream>
-#include "Scanner.cpp"
+#include <vector>
 
 void run(const std::string& sourceCode){
 
@@ -11,8 +12,8 @@ void run(const std::string& sourceCode){
     std::vector<Token> tokens = scanner.scanTokens();
 
   // For now, just print the tokens.
-  for (auto token : tokens) {
-    std::cout << token.lexeme << std::endl;
+  for (int i=0;i<tokens.size();i++) {
+    std::cout << tokens[i].lexeme << std::endl;
   }
     // Indicate an error in the exit code.
     if(hadError)return;
